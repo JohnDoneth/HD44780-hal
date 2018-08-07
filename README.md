@@ -47,7 +47,7 @@ lcd.write_str("Hello, world!");
 - 4 bit mode
 - Busy flag support (Waiting for support from embedded-hal to read and write from a pin)
 - Non-blocking API
-- Make the API for user-friendly
+- Make the API more user-friendly
 - Raspberry Pi example using [linux-embedded-hal](https://github.com/rust-embedded/linux-embedded-hal)
 
 Additional issues as well as pull-requests are welcome!

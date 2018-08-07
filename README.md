@@ -3,17 +3,21 @@
 [![crates.io](https://img.shields.io/crates/v/hd44780-hal.svg)](https://crates.io/crates/hd44780-hal)
 [![crates.io](https://img.shields.io/crates/d/hd44780-hal.svg)](https://crates.io/crates/hd44780-hal)
 
-Implementation of the `embedded-hal` traits for the HD44780
+Implementation of the `embedded-hal` traits for the HD44780.
 
 ![](/header.gif)
 
 
+### Documentation
 
-## Example usage
+https://docs.rs/hd44780-hal
 
-This library is pretty bare bones at the moment, but it's greatest feature is that all you need to do to use it is supply the HD44780 function a bunch of pins that implement the `OutputPin` trait for [embedded-hal](https://github.com/rust-embedded/embedded-hal) as well as a struct that implements delay with support for `DelayUs<u16> + DelayMs<u8>` also from [embedded-hal](https://github.com/rust-embedded/embedded-hal).
+### Example usage
+
+This library is pretty bare bones at the moment, but it's greatest feature is that all you need to do to use it is supply the `HD44780::new` function a bunch of pins that implement the `OutputPin` trait for [embedded-hal](https://github.com/rust-embedded/embedded-hal) as well as a struct that implements delay with support for `DelayUs<u16> + DelayMs<u8>` also from [embedded-hal](https://github.com/rust-embedded/embedded-hal).
 
 ```rust
+// Code grabbed from the metro_m0 example
 let mut lcd = HD44780::new(
     
     pins.d4.into_open_drain_output(&mut pins.port), // Register Select pin
@@ -37,11 +41,16 @@ lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
 
-Issues and pull-requests are welcome!
-
-Todo
+## Todo's
 
 - 4 bit mode
 - Busy flag support
+- Non-blocking API
 - Make the API for user-friendly
 - Raspberry Pi example using [linux-embedded-hal](https://github.com/rust-embedded/linux-embedded-hal)
+
+Additional issues as well as pull-requests are welcome!
+
+## License
+
+This project is licensed under MIT license ([LICENSE](https://github.com/kunerd/clerk/blob/master/docs/CONTRIBUTING.md) or <https://opensource.org/licenses/MIT>)

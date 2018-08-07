@@ -8,7 +8,7 @@ Implementation of the `embedded-hal` traits for the HD44780
 
 ## Example usage
 
-This library is pretty bare bones at the moment, but it's greatest feature is that all you need to do to use it is supply the HD44780 function a bunch of pins that implement the ```OutputPin``` trait for embedded-hal as well as a struct that implements delay with support for ```DelayUs<u16> + DelayMs<u8>```.
+This library is pretty bare bones at the moment, but it's greatest feature is that all you need to do to use it is supply the HD44780 function a bunch of pins that implement the `OutputPin` trait for [embedded-hal](https://github.com/rust-embedded/embedded-hal) as well as a struct that implements delay with support for `DelayUs<u16> + DelayMs<u8>` also from [embedded-hal](https://github.com/rust-embedded/embedded-hal).
 
 ```rust
 let mut lcd = HD44780::new(
@@ -25,7 +25,7 @@ let mut lcd = HD44780::new(
     pins.d11.into_open_drain_output(&mut pins.port), // d6
     pins.d12.into_open_drain_output(&mut pins.port), // d7
 
-	delay,
+    delay,
 );
 
 lcd.reset();
@@ -33,8 +33,6 @@ lcd.clear();
 lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
-
-
 
 Issues and pull-requests are welcome!
 

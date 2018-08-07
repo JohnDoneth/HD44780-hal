@@ -32,6 +32,7 @@ pub struct HD44780<
     delay: D,
 }
 
+/// Used in the direction argument for shifting the cursor and the display
 pub enum Direction {
     Left,
     Right,
@@ -51,6 +52,7 @@ impl<
         O10: OutputPin,
     > HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10>
 {
+    /// Create an instance of a HD44780 from 8 data pins and a delay struct
     pub fn new(
         rs: O1,
         en: O2,
@@ -64,8 +66,6 @@ impl<
         db7: O10,
         delay: D,
     ) -> HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10> {
-        let delay = delay;
-
         let mut hd = HD44780 {
             rs,
             en,
@@ -85,18 +85,13 @@ impl<
         return hd;
     }
 
-    /// Sets DDRAM address 0 in
-    /// address counter. Also
-    /// returns display from being
-    /// shifted to original position.
-    /// DDRAM contents remain
-    /// unchanged.
+    /// Unshifts the display and sets the cursor position to 0
     pub fn reset(&mut self) {
         self.send_byte(0b0000_0010);
         self.delay.delay_us(50);
     }
 
-    
+    /// Set if the display should be on, if the cursor should be visible, and if the cursor should blink
     pub fn set_display_mode(&mut self, display_on: bool, cursor_visible: bool, cursor_blink: bool) {
         let display_bit = {
             if display_on {
@@ -128,11 +123,13 @@ impl<
         self.delay.delay_us(50);
     }
 
+    /// Clear the entire display
     pub fn clear(&mut self) {
         self.send_byte(0b0000_0001);
         self.delay.delay_us(50);
     }
 
+    /// Shift just the cursor to the left or the right
     pub fn shift_cursor(&mut self, dir: Direction) {
         let bits = match dir {
             Direction::Left => 0b0000_0000,
@@ -143,6 +140,7 @@ impl<
         self.delay.delay_us(50);
     }
 
+    /// Shift the entire display to the left or the right
     pub fn shift_display(&mut self, dir: Direction) {
         let bits = match dir {
             Direction::Left => 0b0000_0000,
@@ -214,12 +212,14 @@ impl<
         self.en.set_low();
     }
 
+    /// Write an entire character to the LCD at the cursor position
     pub fn write_str(&mut self, string: &str) {
         for c in string.chars() {
             self.write_char(c);
         }
     }
 
+    /// Write a single character to the LCD at the cursor position
     pub fn write_char(&mut self, data: char) {
         self.rs.set_high();
 

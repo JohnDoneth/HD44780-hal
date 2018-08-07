@@ -2,7 +2,9 @@
 name = "hd44780-hal"
 version = "0.1.0"
 keywords = ["no-std", "lcd", "embedded-hal-driver", "embedded-hal", "hd44780"]
+description = "A library to use HD44780 compliant displays with embedded-hal"
 authors = ["John Doneth <doneth7@gmail.com>"]
+license = "MIT"
 
 [dependencies]
 embedded-hal = "0.2"

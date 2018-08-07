@@ -1,5 +1,8 @@
 # hd44780-hal
 
+[![crates.io](https://img.shields.io/crates/v/hd44780-hal.svg)](https://crates.io/crates/hd44780-hal)
+[![crates.io](https://img.shields.io/crates/d/hd44780-hal.svg)](https://crates.io/crates/hd44780-hal)
+
 Implementation of the `embedded-hal` traits for the HD44780
 
 ![](/header.gif)

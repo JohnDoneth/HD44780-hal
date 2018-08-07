@@ -45,7 +45,7 @@ lcd.write_str("Hello, world!");
 ## Todo's
 
 - 4 bit mode
-- Busy flag support
+- Busy flag support (Waiting for support from embedded-hal to read and write from a pin)
 - Non-blocking API
 - Make the API for user-friendly
 - Raspberry Pi example using [linux-embedded-hal](https://github.com/rust-embedded/linux-embedded-hal)

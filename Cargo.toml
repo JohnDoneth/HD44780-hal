@@ -1,0 +1,8 @@
+[package]
+name = "hd44780-hal"
+version = "0.1.0"
+keywords = ["no-std", "lcd", "embedded-hal-driver", "embedded-hal", "hd44780"]
+authors = ["John Doneth <doneth7@gmail.com>"]
+
+[dependencies]
+embedded-hal = "0.2"

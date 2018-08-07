@@ -42,7 +42,7 @@ lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
 
-## Todo's
+## Todo
 
 - 4 bit mode
 - Busy flag support (Waiting for support from embedded-hal to read and write from a pin)

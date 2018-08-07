@@ -52,7 +52,8 @@ impl<
         O10: OutputPin,
     > HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10>
 {
-    /// Create an instance of a HD44780 from 8 data pins and a delay struct
+    /// Create an instance of a HD44780 from 8 data pins, a recieve 
+    /// pin, an enable pin and a struct implementing the delay trait
     pub fn new(
         rs: O1,
         en: O2,
@@ -184,8 +185,6 @@ impl<
         self.pulse_enable();
 
         self.delay.delay_us(100);
-
-        self.shift_cursor(Direction::Left);
     }
 
     ///

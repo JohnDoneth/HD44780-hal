@@ -141,7 +141,7 @@ impl<
         self.set_bus_bits(byte);
 
         self.en.set_high();
-        delay.delay_ms(15u8);
+        delay.delay_ms(2u8);
         self.en.set_low();
 
         if data {
@@ -264,13 +264,13 @@ impl<
         self.write_upper_nibble(byte);
 
         self.en.set_high();
-        delay.delay_ms(15u8);
+        delay.delay_ms(2u8);
         self.en.set_low();
 
         self.write_lower_nibble(byte);
 
         self.en.set_high();
-        delay.delay_ms(15u8);
+        delay.delay_ms(2u8);
         self.en.set_low();
 
         if data {

@@ -24,8 +24,6 @@ use hd44780_hal::HD44780;
 
 extern crate embedded_hal;
 
-use embedded_hal::digital::OutputPin;
-
 fn main() {
     let mut peripherals = Peripherals::take().unwrap();
 
@@ -41,11 +39,6 @@ fn main() {
     let mut pins = metro_m0::pins(peripherals.PORT);
     let delay = Delay::new(core.SYST, &mut clocks);
 
-    /*pins.d5.into_open_drain_output(&mut pins.port).set_low();  // d0
-    pins.d6.into_open_drain_output(&mut pins.port).set_low();  // d1
-    pins.d7.into_open_drain_output(&mut pins.port).set_low();  // d2
-    pins.d8.into_open_drain_output(&mut pins.port).set_low();  // d3*/
-
     let mut lcd = HD44780::new_4bit(
     
         pins.d4.into_open_drain_output(&mut pins.port), // Register Select pin
@@ -59,14 +52,23 @@ fn main() {
         delay,
     );
 
-
-    lcd.reset();
+    // Unshift display and set cursor to 0
+    lcd.reset(); 
     
-    lcd.clear();
+    // Clear existing characters
+    lcd.clear(); 
 
+    // Enable the display, enable cursor and blink the cursor
     lcd.set_display_mode(true, true, true);
 
+    // Display the following string
     lcd.write_str("Hello, world!");
+
+    // Move the cursor to the second line
+    lcd.set_cursor_pos(40);
+
+    // Display the following string on the second line
+    lcd.write_str("I'm on line 2!");
  
     loop { }
 }

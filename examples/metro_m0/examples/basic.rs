@@ -54,13 +54,16 @@ fn main() {
         delay,
     );
 
-
-    lcd.reset();
+    // Unshift display and set cursor to 0
+    lcd.reset(); 
     
-    lcd.clear();
+    // Clear existing characters
+    lcd.clear(); 
 
+    // Enable the display, enable cursor and blink the cursor
     lcd.set_display_mode(true, true, true);
 
+    // Display the following string
     lcd.write_str("Hello, world!");
  
     loop { }

@@ -44,7 +44,7 @@ fn main() {
     db6.set_direction(Direction::Low).unwrap();
     db7.set_direction(Direction::Low).unwrap();
 
-    let mut lcd = HD44780::new(
+    let mut lcd = HD44780::new_8bit(
         rs,
         en,
         db0,

@@ -52,9 +52,18 @@ impl<
         O10: OutputPin,
     > HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10>
 {
-    /// Create an instance of a HD44780 from 8 data pins, a recieve
-    /// pin, an enable pin and a struct implementing the delay trait
-    pub fn new(
+    /// Create an instance of a `HD44780` from 8 data pins, a register select
+    /// pin, an enable pin and a struct implementing the delay trait.
+    /// - The delay instance is used to sleep between commands to 
+    /// ensure the `HD44780` has enough time to process commands.
+    /// - The eight db0..db7 pins are used to send and recieve with
+    ///  the `HD44780`.
+    /// - The register select pin is used to tell the `HD44780` 
+    /// if incoming data is a command or data.
+    /// - The enable pin is used to tell the `HD44780` that there 
+    /// is data on the 8 data pins and that it should read them in.
+    /// 
+    pub fn new_8bit(
         rs: O1,
         en: O2,
         db0: O3,
@@ -67,6 +76,7 @@ impl<
         db7: O10,
         delay: D,
     ) -> HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10> {
+        
         let mut hd = HD44780 {
             rs,
             en,
@@ -87,6 +97,10 @@ impl<
     }
 
     /// Unshifts the display and sets the cursor position to 0
+    /// 
+    /// ```
+    /// lcd.reset();
+    /// ```
     pub fn reset(&mut self) {
         self.send_byte(0b0000_0010);
 
@@ -95,6 +109,11 @@ impl<
     }
 
     /// Set if the display should be on, if the cursor should be visible, and if the cursor should blink
+    /// 
+    /// ```
+    /// // Set the display to be on, the cursor to be visible, and the cursor to be blinking.
+    /// lcd.set_display_mode(true, true, true);
+    /// ```
     pub fn set_display_mode(&mut self, display_on: bool, cursor_visible: bool, cursor_blink: bool) {
         let display_bit = {
             if display_on {
@@ -129,6 +148,10 @@ impl<
     }
 
     /// Clear the entire display
+    /// 
+    /// ```
+    /// lcd.clear();
+    /// ```
     pub fn clear(&mut self) {
         self.send_byte(0b0000_0001);
 
@@ -136,7 +159,28 @@ impl<
         self.delay.delay_us(50);
     }
 
+    /// Set the cursor position
+    /// 
+    /// ```
+    /// // Move to line 2
+    /// lcd.set_cursor_pos(40)
+    /// ```
+    pub fn set_cursor_pos(&mut self, position : u8) {
+        
+        let lower_7_bits = 0b0111_1111 & position;
+        
+        self.send_byte(0b1000_0000 | lower_7_bits);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(50);
+    }
+
     /// Shift just the cursor to the left or the right
+    /// 
+    /// ```
+    /// lcd.shift_cursor(Direction::Left);
+    /// lcd.shift_cursor(Direction::Right);
+    /// ```
     pub fn shift_cursor(&mut self, dir: Direction) {
         let bits = match dir {
             Direction::Left => 0b0000_0000,
@@ -150,6 +194,11 @@ impl<
     }
 
     /// Shift the entire display to the left or the right
+    /// 
+    /// ```
+    /// lcd.shift_display(Direction::Left);
+    /// lcd.shift_display(Direction::Right);
+    /// ```
     pub fn shift_display(&mut self, dir: Direction) {
         let bits = match dir {
             Direction::Left => 0b0000_0000,
@@ -203,14 +252,22 @@ impl<
         self.delay.delay_us(100);
     }
 
-    /// Write an entire string to the LCD at the cursor position
+    /// Writes an entire string to the `HD44780`
+    /// 
+    /// ```
+    /// lcd.write_str("Hello, world!");
+    /// ```
     pub fn write_str(&mut self, string: &str) {
         for c in string.chars() {
             self.write_char(c);
         }
     }
 
-    /// Write a single character to the LCD at the cursor position
+    /// Write a single character to the `HD44780`
+    /// 
+    /// ```
+    /// lcd.write_char('A');
+    /// ```
     pub fn write_char(&mut self, data: char) {
         self.rs.set_high();
 

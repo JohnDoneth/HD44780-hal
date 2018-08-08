@@ -37,7 +37,7 @@ fn main() {
     let mut pins = metro_m0::pins(peripherals.PORT);
     let delay = Delay::new(core.SYST, &mut clocks);
 
-    let mut lcd = HD44780::new(
+    let mut lcd = HD44780::new_8bit(
     
         pins.d4.into_open_drain_output(&mut pins.port), // Register Select pin
         pins.d3.into_open_drain_output(&mut pins.port), // Enable pin
@@ -60,10 +60,8 @@ fn main() {
     lcd.clear();
 
     lcd.set_display_mode(true, true, true);
-    
+
     lcd.write_str("Hello, world!");
  
-    loop {
-        
-    }
+    loop { }
 }

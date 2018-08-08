@@ -2,9 +2,9 @@
 
 extern crate embedded_hal;
 
-use embedded_hal::digital::OutputPin;
-use embedded_hal::blocking::delay::DelayUs;
 use embedded_hal::blocking::delay::DelayMs;
+use embedded_hal::blocking::delay::DelayUs;
+use embedded_hal::digital::OutputPin;
 
 pub struct HD44780<
     D: DelayUs<u16> + DelayMs<u8>,
@@ -52,7 +52,7 @@ impl<
         O10: OutputPin,
     > HD44780<D, O1, O2, O3, O4, O5, O6, O7, O8, O9, O10>
 {
-    /// Create an instance of a HD44780 from 8 data pins, a recieve 
+    /// Create an instance of a HD44780 from 8 data pins, a recieve
     /// pin, an enable pin and a struct implementing the delay trait
     pub fn new(
         rs: O1,
@@ -89,6 +89,8 @@ impl<
     /// Unshifts the display and sets the cursor position to 0
     pub fn reset(&mut self) {
         self.send_byte(0b0000_0010);
+
+        // Wait for the command to be processed
         self.delay.delay_us(50);
     }
 
@@ -121,12 +123,16 @@ impl<
         let cmd_byte = 0b0000_1000 | display_bit | cursor_visible_bit | cursor_blink_bit;
 
         self.send_byte(cmd_byte);
+
+        // Wait for the command to be processed
         self.delay.delay_us(50);
     }
 
     /// Clear the entire display
     pub fn clear(&mut self) {
         self.send_byte(0b0000_0001);
+
+        // Wait for the command to be processed
         self.delay.delay_us(50);
     }
 
@@ -138,6 +144,8 @@ impl<
         };
 
         self.send_byte(0b0001_0000 | bits);
+
+        // Wait for the command to be processed
         self.delay.delay_us(50);
     }
 
@@ -150,68 +158,52 @@ impl<
 
         self.send_byte(0b0001_1000 | bits);
 
+        // Wait for the command to be processed
         self.delay.delay_us(50);
     }
 
+    // Follow the 8-bit setup procedure as specified in the HD44780 datasheet
     fn init_8bit(&mut self) {
+        // Wait for the LCD to wakeup if it was off
         self.delay.delay_ms(15u8);
 
-        self.set_bus_bits(0b0011_0000); // Initialize Lcd in 8-bit mode
-        self.pulse_enable();
+        // Initialize Lcd in 8-bit mode
+        self.send_byte(0b0011_0000);
 
+        // Wait for the command to be processed
         self.delay.delay_ms(5u8);
 
-        self.set_bus_bits(0b0011_1000); // enable 5x7 mode for chars
-        self.pulse_enable();
+        // Enable 5x7 mode for chars
+        self.send_byte(0b0011_1000);
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
 
         self.send_byte(0b0000_1110);
-        self.pulse_enable();
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
 
-        self.send_byte(0b0000_0001); // Clear Display
-        self.pulse_enable();
+        // Clear Display
+        self.send_byte(0b0000_0001);
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
 
-        self.send_byte(0b000_0111); // Move the cursor to beginning of first line
-        self.pulse_enable();
+        // Move the cursor to beginning of first line
+        self.send_byte(0b000_0111);
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
 
-        self.send_byte(0b000_0110); // Set entry mode to increment by one
-        self.pulse_enable();
+        // Set entry mode to increment by one
+        self.send_byte(0b000_0110);
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
     }
 
-    ///
-    /// Read busy flag and address reads the busy flag (BF) indicating that the system is now internally operating
-    /// on a previously received instruction. If BF is 1, the internal operation is in progress. The next instruction
-    /// will not be accepted until BF is reset to 0. Check the BF status before the next write operation. At the same
-    /// time, the value of the address counter in binary AAAAAAA is read out. This address counter is used by
-    /// both  CG  and  DDRAM  addresses,  and  its  value  is  determined  by  the  previous  instruction.  The  address
-    /// contents are the same as for instructions set CGRAM address and set DDRAM address.
-    /*fn read_busy_flag(&mut self) -> bool {
-
-        self.rw.set_high(); // read
-
-        let busy_flag = self.db7.is_high();
-
-        self.rw.set_low();
-
-        return busy_flag;
-    }*/
-
-    fn pulse_enable(&mut self) {
-        self.en.set_high();
-        self.delay.delay_ms(15u8);
-        self.en.set_low();
-    }
-
-    /// Write an entire character to the LCD at the cursor position
+    /// Write an entire string to the LCD at the cursor position
     pub fn write_str(&mut self, string: &str) {
         for c in string.chars() {
             self.write_char(c);
@@ -226,25 +218,26 @@ impl<
 
         self.rs.set_low();
 
+        // Wait for the command to be processed
         self.delay.delay_us(100);
     }
 
+    // Send a byte to the HD44780 by setting the data on the bus and
+    // also pulsing the enable pin
     fn send_byte(&mut self, data: u8) {
-        // 8-bit mode
-
         // Pulse the enable pin
         self.set_bus_bits(data);
         self.pulse_enable();
-
-        /*let high_nibble = (data & 0xF0); 
-
-        self.send_nibble(high_nibble);
-
-        let lower_nibble = (data << 4) & 0xF0;
-
-        self.send_nibble(lower_nibble);*/
     }
 
+    // Pulse the enable pin telling the HD44780 that we something for it
+    fn pulse_enable(&mut self) {
+        self.en.set_high();
+        self.delay.delay_ms(15u8);
+        self.en.set_low();
+    }
+
+    // Set the pins on the data bus
     fn set_bus_bits(&mut self, data: u8) {
         let db0: bool = (0b0000_0001 & data) != 0;
         let db1: bool = (0b0000_0010 & data) != 0;

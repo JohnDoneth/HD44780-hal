@@ -42,15 +42,20 @@ lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
 
-## Todo
+### Examples
+
+Currently there are basic examples for **Raspberry Pi** as well as the **Adafruit Metro Express M0** as those are the devices I currently have on hand. 
+
+### Todo
 
 - 4 bit mode
 - Busy flag support (Waiting for support from embedded-hal to read and write from a pin)
 - Non-blocking API
-- Make the API more user-friendly
+- A more user-friendly API with additional features
+- Custom characters
 
 Additional issues as well as pull-requests are welcome!
 
-## License
+### License
 
 This project is licensed under MIT license ([LICENSE](https://github.com/kunerd/clerk/blob/master/docs/CONTRIBUTING.md) or <https://opensource.org/licenses/MIT>)

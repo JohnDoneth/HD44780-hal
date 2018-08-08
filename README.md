@@ -13,6 +13,12 @@ Implementation of the `embedded-hal` traits for the HD44780.
 
 https://docs.rs/hd44780-hal
 
+### Examples
+
+Currently there are basic examples for **Raspberry Pi** as well as the **Adafruit Metro Express M0** as those are the devices I currently have on hand. 
+
+Any platform that implements the [embedded-hal](https://github.com/rust-embedded/embedded-hal) traits is supported by this library! :thumbsup:
+
 ### Example usage
 
 This library is pretty bare bones at the moment, but it's greatest feature is that all you need to do to use it is supply the `HD44780::new` function a bunch of pins that implement the `OutputPin` trait for [embedded-hal](https://github.com/rust-embedded/embedded-hal) as well as a struct that implements delay with support for `DelayUs<u16> + DelayMs<u8>` also from [embedded-hal](https://github.com/rust-embedded/embedded-hal).
@@ -41,10 +47,6 @@ lcd.clear();
 lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
-
-### Examples
-
-Currently there are basic examples for **Raspberry Pi** as well as the **Adafruit Metro Express M0** as those are the devices I currently have on hand. 
 
 ### Todo
 

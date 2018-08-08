@@ -48,9 +48,10 @@ lcd.set_display_mode(true, true, true);
 lcd.write_str("Hello, world!");
 ```
 
-### Todo
+### Features
+- 4-bit & 8-bit modes are supported
 
-- 4 bit mode
+### Todo
 - Busy flag support (Waiting for support from embedded-hal to read and write from a pin)
 - Non-blocking API
 - A more user-friendly API with additional features

@@ -10,6 +10,9 @@ pub trait DataBus {
 
     fn write<D : DelayUs<u16> + DelayMs<u8>>(&mut self, byte : u8, data : bool, delay : &mut D);
 
+    // Needed for 4-bit init procedure
+    fn write_nibble<D : DelayUs<u16> + DelayMs<u8>>(&mut self, byte : u8, delay : &mut D) {}
+
     // TODO
     // fn read(...)
 
@@ -129,7 +132,7 @@ impl<
 
     fn write<D : DelayUs<u16> + DelayMs<u8>>(&mut self, byte : u8, data : bool, delay : &mut D) {
         
-        if data == true {
+        if data {
             self.rs.set_high();
         } else {
             self.rs.set_low();
@@ -141,7 +144,7 @@ impl<
         delay.delay_ms(15u8);
         self.en.set_low();
 
-        if data == true {
+        if data {
             self.rs.set_low();
         }
 
@@ -171,20 +174,124 @@ impl<
     D4: OutputPin,
     D5: OutputPin,
     D6: OutputPin,
+    D7: OutputPin
+> FourBitBus<RS, EN, D4, D5, D6, D7> {
+
+    fn write_lower_nibble(&mut self, data: u8) {
+        
+        let db0: bool = (0b0000_0001 & data) != 0;
+        let db1: bool = (0b0000_0010 & data) != 0;
+        let db2: bool = (0b0000_0100 & data) != 0;
+        let db3: bool = (0b0000_1000 & data) != 0;
+
+        if db0 {
+            self.d4.set_high();
+        } else {
+            self.d4.set_low();
+        }
+
+        if db1 {
+            self.d5.set_high();
+        } else {
+            self.d5.set_low();
+        }
+
+        if db2 {
+            self.d6.set_high();
+        } else {
+            self.d6.set_low();
+        }
+
+        if db3 {
+            self.d7.set_high();
+        } else {
+            self.d7.set_low();
+        }
+
+    }
+
+    fn write_upper_nibble(&mut self, data: u8) {
+
+        let db4: bool = (0b0001_0000 & data) != 0;
+        let db5: bool = (0b0010_0000 & data) != 0;
+        let db6: bool = (0b0100_0000 & data) != 0;
+        let db7: bool = (0b1000_0000 & data) != 0;
+
+        if db4 {
+            self.d4.set_high();
+        } else {
+            self.d4.set_low();
+        }
+
+        if db5 {
+            self.d5.set_high();
+        } else {
+            self.d5.set_low();
+        }
+
+        if db6 {
+            self.d6.set_high();
+        } else {
+            self.d6.set_low();
+        }
+
+        if db7 {
+            self.d7.set_high();
+        } else {
+            self.d7.set_low();
+        }
+    }
+
+}
+
+impl<
+    RS: OutputPin,
+    EN: OutputPin,
+    D4: OutputPin,
+    D5: OutputPin,
+    D6: OutputPin,
     D7: OutputPin,
 > DataBus for FourBitBus<RS, EN, D4, D5, D6, D7> {
 
     fn write<D : DelayUs<u16> + DelayMs<u8>>(&mut self, byte : u8, data : bool, delay : &mut D) {
-        
-        unimplemented!("Not yet implemented");
 
-        //self.set_bus_bits(byte);
+        if data {
+            self.rs.set_high();
+        } else {
+            self.rs.set_low();
+        }
 
-        // self.en.set_high();
-        // delay.delay_ms(15u8);
-        // self.en.set_low();
+        self.write_upper_nibble(byte);
+
+        self.en.set_high();
+        delay.delay_ms(15u8);
+        self.en.set_low();
+
+        self.write_lower_nibble(byte);
+
+        self.en.set_high();
+        delay.delay_ms(15u8);
+        self.en.set_low();
+
+        if data {
+            self.rs.set_low();
+        }
 
     }
+
+    fn write_nibble<D : DelayUs<u16> + DelayMs<u8>>(&mut self, byte : u8, delay : &mut D) {
+
+        self.rs.set_low(); // not data, because this is a command
+
+        self.en.set_high();
+        delay.delay_ms(15u8);
+        self.en.set_low();
+
+        self.write_upper_nibble(byte);
+
+    }
+
+    
 
 }
 
@@ -313,7 +420,7 @@ impl<D: DelayUs<u16> + DelayMs<u8>,
             delay,
         };
 
-        //hd.init_8bit();
+        hd.init_4bit();
 
         return hd;
     }
@@ -335,7 +442,7 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(0b0000_0010, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_us(150);
     }
 
     /// Set if the display should be on, if the cursor should be visible, and if the cursor should blink
@@ -374,7 +481,7 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(cmd_byte, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_us(150);
     }
 
     /// Clear the entire display
@@ -387,7 +494,7 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(0b0000_0001, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_ms(15u8);
     }
 
     /// Set the cursor position
@@ -403,7 +510,7 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(0b1000_0000 | lower_7_bits, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_us(150);
     }
 
     /// Shift just the cursor to the left or the right
@@ -421,7 +528,7 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(0b0001_0000 | bits, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_us(150);
     }
 
     /// Shift the entire display to the left or the right
@@ -439,7 +546,55 @@ impl<D, B> HD44780<D, B> where
         self.bus.write(0b0001_1000 | bits, false, &mut self.delay);
 
         // Wait for the command to be processed
-        self.delay.delay_us(50);
+        self.delay.delay_us(150);
+    }
+
+    fn init_4bit(&mut self) {
+
+        // Wait for the LCD to wakeup if it was off
+        self.delay.delay_ms(15u8);
+
+        // Initialize Lcd in 4-bit mode
+        self.bus.write(0x33, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_ms(5u8);
+
+        // Sets 4-bit operation and enables 5x7 mode for chars
+        self.bus.write(0x32, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+        self.bus.write(0x28, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+        // Clear Display
+        self.bus.write(0x0E, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+        // Move the cursor to beginning of first line
+        self.bus.write(0x01, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+        // Set entry mode to increment by one
+        self.bus.write(0x06, false, &mut self.delay);
+
+        // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+        self.bus.write(0x80, false, &mut self.delay);
+
+         // Wait for the command to be processed
+        self.delay.delay_us(100);
+
+
     }
 
     // Follow the 8-bit setup procedure as specified in the HD44780 datasheet
@@ -453,7 +608,7 @@ impl<D, B> HD44780<D, B> where
         // Wait for the command to be processed
         self.delay.delay_ms(5u8);
 
-        // Enable 5x7 mode for chars
+        // Sets 8-bit operation and enables 5x7 mode for chars
         self.bus.write(0b0011_1000, false, &mut self.delay);
 
         // Wait for the command to be processed
